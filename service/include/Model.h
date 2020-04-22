@@ -1,6 +1,8 @@
-//
-// Model
-//
+/*
+* class Model.h
+* user: laitassou
+* description
+*/
 
 #pragma once
 
@@ -17,11 +19,29 @@
 
 class Tensor;
 
-//using GraphResourcePtr = std::unique_ptr<TF_Graph> ;
-
 
 class Model {
 public:
+    struct GraphCreate {
+        TF_Graph * operator()() { return TF_NewGraph();}
+    };
+    struct GraphDeleter {
+        void operator()(TF_Graph* b) { TF_DeleteGraph(b);}
+    };
+    
+    struct SessionDeleter {
+        void operator()(TF_Session* sess, TF_Status * status ) { TF_DeleteSession(sess,status);}
+        
+    };
+    
+    struct StatusDeleter {
+        void operator()(TF_Status* status) { TF_DeleteStatus(status);}        
+    };
+
+
+    using unique_graph_ptr = std::unique_ptr<TF_Graph, GraphDeleter>;
+    using unique_session_ptr = std::unique_ptr<TF_Session, SessionDeleter>;
+    using unique_status_ptr = std::unique_ptr<TF_Status, StatusDeleter >;
     explicit Model(const std::string&);
 
     // Rule of five, moving is easy as the pointers can be copied, copying not as i have no idea how to copy
@@ -51,17 +71,11 @@ public:
     void run(const std::vector<Tensor*>& inputs, Tensor* output);
     void run(Tensor* input, Tensor* output);
 
-    struct GraphCreate {
-        TF_Graph * operator()() { return TF_NewGraph(); }
-    };
-    struct GraphDeleter {
-        void operator()(TF_Graph* b) { TF_DeleteGraph(b); }
-    };
-
 private:
-    std::unique_ptr<TF_Graph, GraphDeleter> graph;
-    TF_Session* session;
-    TF_Status* status;
+    unique_graph_ptr _graph;
+    //unique_session_ptr _session;
+    TF_Session * _session;
+    unique_status_ptr _status;
 
     // Read a file from a string
     static TF_Buffer* read(const std::string&);

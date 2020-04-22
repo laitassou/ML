@@ -1,3 +1,9 @@
+/*
+* class Tensor.h
+* user: laitassou
+* description:
+*/
+
 #pragma once
 
 #include <vector>

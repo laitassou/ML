@@ -1,15 +1,16 @@
 #include "../include/Model.h"
 
-Model::Model(const std::string& model_filename):graph(TF_NewGraph()){
-
-    this->status = TF_NewStatus();
-    //this->graph = std::make_unique<TF_Graph>(GraphCreate(), GraphDeleter); //TF_NewGraph();
+Model::Model(const std::string& model_filename):_graph(TF_NewGraph()),_status( TF_NewStatus()){
 
     // Create the session.
     TF_SessionOptions* sess_opts = TF_NewSessionOptions();
 
-    this->session = TF_NewSession(graph.get(), sess_opts, this->status);
+   _session = TF_NewSession(_graph.get(), sess_opts, _status.get());
+
+    //_session.reset ( TF_NewSession(_graph.get(), sess_opts, _status.get()));
     TF_DeleteSessionOptions(sess_opts);
+
+
 
     // Check the status
     this->status_check(true);
@@ -23,7 +24,7 @@ Model::Model(const std::string& model_filename):graph(TF_NewGraph()){
     this->error_check(def != nullptr, "An error occurred reading the model");
 
     TF_ImportGraphDefOptions* graph_opts = TF_NewImportGraphDefOptions();
-    TF_GraphImportGraphDef(graph.get(), def, graph_opts, this->status);
+    TF_GraphImportGraphDef(_graph.get(), def, graph_opts, _status.get());
     TF_DeleteImportGraphDefOptions(graph_opts);
     TF_DeleteBuffer(def);
 
@@ -32,19 +33,19 @@ Model::Model(const std::string& model_filename):graph(TF_NewGraph()){
 }
 
 Model::~Model() {
-    TF_DeleteSession(this->session, this->status);
+    //TF_DeleteSession(_session, _status);
     ///TF_DeleteGraph(this->graph);
     this->status_check(true);
-    TF_DeleteStatus(this->status);
+    //TF_DeleteStatus(_status);
 }
 
 
 void Model::init() {
-    TF_Operation* init_op[1] = {TF_GraphOperationByName(this->graph.get(), "init")};
+    TF_Operation* init_op[1] = {TF_GraphOperationByName(_graph.get(), "init")};
 
     this->error_check(init_op[0]!= nullptr, "Error: No operation named \"init\" exists");
 
-    TF_SessionRun(this->session, nullptr, nullptr, nullptr, 0, nullptr, nullptr, 0, init_op, 1, nullptr, this->status);
+    TF_SessionRun(_session, nullptr, nullptr, nullptr, 0, nullptr, nullptr, 0, init_op, 1, nullptr, _status.get());
     this->status_check(true);
 }
 
@@ -54,10 +55,10 @@ void Model::save(const std::string &ckpt) {
     TF_Tensor* t = TF_AllocateTensor(TF_STRING, nullptr, 0, size);
     char* data = static_cast<char *>(TF_TensorData(t));
     for (int i=0; i<8; i++) {data[i]=0;}
-    TF_StringEncode(ckpt.c_str(), ckpt.size(), data + 8, size - 8, status);
+    TF_StringEncode(ckpt.c_str(), ckpt.size(), data + 8, size - 8, _status.get());
 
     memset(data, 0, 8);  // 8-byte offset of first string.
-    TF_StringEncode(ckpt.c_str(), ckpt.length(), (char*)(data + 8), size - 8, status);
+    TF_StringEncode(ckpt.c_str(), ckpt.length(), (char*)(data + 8), size - 8, _status.get());
 
     // Check errors
     if (!this->status_check(false)) {
@@ -67,19 +68,19 @@ void Model::save(const std::string &ckpt) {
     }
 
     TF_Output output_file;
-    output_file.oper = TF_GraphOperationByName(this->graph.get(), "save/Const");
+    output_file.oper = TF_GraphOperationByName(_graph.get(), "save/Const");
     output_file.index = 0;
     TF_Output inputs[1] = {output_file};
 
     TF_Tensor* input_values[1] = {t};
-    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(this->graph.get(), "save/control_dependency")};
+    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(_graph.get(), "save/control_dependency")};
     if (!restore_op[0]) {
         TF_DeleteTensor(t);
         this->error_check(false, "Error: No operation named \"save/control_dependencyl\" exists");
     }
 
 
-    TF_SessionRun(this->session, nullptr, inputs, input_values, 1, nullptr, nullptr, 0, restore_op, 1, nullptr, this->status);
+    TF_SessionRun(_session, nullptr, inputs, input_values, 1, nullptr, nullptr, 0, restore_op, 1, nullptr, _status.get());
     TF_DeleteTensor(t);
 
     this->status_check(true);
@@ -92,7 +93,7 @@ void Model::restore(const std::string& ckpt) {
     TF_Tensor* t = TF_AllocateTensor(TF_STRING, nullptr, 0, size);
     char* data = static_cast<char *>(TF_TensorData(t));
     for (int i=0; i<8; i++) {data[i]=0;}
-    TF_StringEncode(ckpt.c_str(), ckpt.size(), data + 8, size - 8, status);
+    TF_StringEncode(ckpt.c_str(), ckpt.size(), data + 8, size - 8, _status.get());
 
     // Check errors
     if (!this->status_check(false)) {
@@ -102,12 +103,12 @@ void Model::restore(const std::string& ckpt) {
     }
 
     TF_Output output_file;
-    output_file.oper = TF_GraphOperationByName(this->graph.get(), "save/Const");
+    output_file.oper = TF_GraphOperationByName(_graph.get(), "save/Const");
     output_file.index = 0;
     TF_Output inputs[1] = {output_file};
 
     TF_Tensor* input_values[1] = {t};
-    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(this->graph.get(), "save/restore_all")};
+    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(_graph.get(), "save/restore_all")};
     if (!restore_op[0]) {
         TF_DeleteTensor(t);
         this->error_check(false, "Error: No operation named \"save/restore_all\" exists");
@@ -115,7 +116,7 @@ void Model::restore(const std::string& ckpt) {
 
 
 
-    TF_SessionRun(this->session, nullptr, inputs, input_values, 1, nullptr, nullptr, 0, restore_op, 1, nullptr, this->status);
+    TF_SessionRun(_session, nullptr, inputs, input_values, 1, nullptr, nullptr, 0, restore_op, 1, nullptr, _status.get());
     TF_DeleteTensor(t);
 
     this->status_check(true);
@@ -164,7 +165,7 @@ std::vector<std::string> Model::get_operations() const {
     TF_Operation* oper;
 
     // Iterate through the operations of a graph
-    while ((oper = TF_GraphNextOperation(this->graph.get(), &pos)) != nullptr) {
+    while ((oper = TF_GraphNextOperation(_graph.get(), &pos)) != nullptr) {
         result.emplace_back(TF_OperationName(oper));
     }
 
@@ -198,7 +199,7 @@ void Model::run(const std::vector<Tensor*>& inputs, const std::vector<Tensor*>& 
     // Prepare output recipients
     auto ov = new TF_Tensor*[outputs.size()];
 
-    TF_SessionRun(this->session, nullptr, io.data(), iv.data(), inputs.size(), oo.data(), ov, outputs.size(), nullptr, 0, nullptr, this->status);
+    TF_SessionRun(_session, nullptr, io.data(), iv.data(), inputs.size(), oo.data(), ov, outputs.size(), nullptr, 0, nullptr, _status.get());
     this->status_check(true);
 
     // Save results on outputs and mark as full
@@ -240,9 +241,9 @@ void Model::run(Tensor *input, const std::vector<Tensor*> &outputs) {
 
 bool Model::status_check(bool throw_exc) const {
 
-    if (TF_GetCode(this->status) != TF_OK) {
+    if (TF_GetCode(_status.get()) != TF_OK) {
         if (throw_exc) {
-            throw std::runtime_error(TF_Message(status));
+            throw std::runtime_error(TF_Message(_status.get()));
         } else {
             return false;
         }

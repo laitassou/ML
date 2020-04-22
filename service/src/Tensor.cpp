@@ -5,7 +5,7 @@
 Tensor::Tensor(const Model& model, const std::string& operation) {
 
     // Get operation by the name
-    this->op.oper = TF_GraphOperationByName(model.graph.get(), operation.c_str());
+    this->op.oper = TF_GraphOperationByName(model._graph.get(), operation.c_str());
     this->op.index = 0;
 
     // Operation did not exists
@@ -14,7 +14,7 @@ Tensor::Tensor(const Model& model, const std::string& operation) {
     // DIMENSIONS
 
     // Get number of dimensions
-    int n_dims = TF_GraphGetTensorNumDims(model.graph.get(), this->op, model.status);
+    int n_dims = TF_GraphGetTensorNumDims(model._graph.get(), this->op, model._status.get());
 
     // DataType
     this->type = TF_OperationOutputType(this->op);
@@ -23,7 +23,7 @@ Tensor::Tensor(const Model& model, const std::string& operation) {
     if (n_dims > 0) {
         // Get dimensions
         auto *dims = new int64_t[n_dims];
-        TF_GraphGetTensorShape(model.graph.get(), this->op, dims, n_dims, model.status);
+        TF_GraphGetTensorShape(model._graph.get(), this->op, dims, n_dims, model._status.get());
 
         // Check error on Model Status
         model.status_check(true);
@@ -153,24 +153,6 @@ TF_DataType Tensor::deduce_type() {
         return TF_FLOAT;
     if (std::is_same<T, double>::value)
         return TF_DOUBLE;
-    if (std::is_same<T, int32_t >::value)
-        return TF_INT32;
-    if (std::is_same<T, uint8_t>::value)
-        return TF_UINT8;
-    if (std::is_same<T, int16_t>::value)
-        return TF_INT16;
-    if (std::is_same<T, int8_t>::value)
-        return TF_INT8;
-    if (std::is_same<T, int64_t>::value)
-        return TF_INT64;
-//    if constexpr (std::is_same<T, bool>::value)
-//        return TF_BOOL;
-    if (std::is_same<T, uint16_t>::value)
-        return TF_UINT16;
-    if (std::is_same<T, uint32_t>::value)
-        return TF_UINT32;
-    if (std::is_same<T, uint64_t>::value)
-        return TF_UINT64;
 
     throw std::runtime_error{"Could not deduce type!"};
 }
@@ -194,50 +176,20 @@ void Tensor::deduce_shape() {
 template TF_DataType Tensor::deduce_type<float>();
 template TF_DataType Tensor::deduce_type<double>();
 //template TF_DataType Tensor::deduce_type<bool>();
-template TF_DataType Tensor::deduce_type<int8_t>();
-template TF_DataType Tensor::deduce_type<int16_t>();
-template TF_DataType Tensor::deduce_type<int32_t>();
-template TF_DataType Tensor::deduce_type<int64_t>();
-template TF_DataType Tensor::deduce_type<uint8_t>();
-template TF_DataType Tensor::deduce_type<uint16_t>();
-template TF_DataType Tensor::deduce_type<uint32_t>();
-template TF_DataType Tensor::deduce_type<uint64_t>();
 
 // VALID get_data TEMPLATES
 template std::vector<float> Tensor::get_data<float>();
 template std::vector<double> Tensor::get_data<double>();
 template std::vector<bool> Tensor::get_data<bool>();
-template std::vector<int8_t> Tensor::get_data<int8_t>();
-template std::vector<int16_t> Tensor::get_data<int16_t>();
-template std::vector<int32_t> Tensor::get_data<int32_t>();
-template std::vector<int64_t> Tensor::get_data<int64_t>();
-template std::vector<uint8_t> Tensor::get_data<uint8_t>();
-template std::vector<uint16_t> Tensor::get_data<uint16_t>();
-template std::vector<uint32_t> Tensor::get_data<uint32_t>();
-template std::vector<uint64_t> Tensor::get_data<uint64_t>();
+
 
 // VALID set_data TEMPLATES
 template void Tensor::set_data<float>(std::vector<float> new_data);
 template void Tensor::set_data<double>(std::vector<double> new_data);
 //template void Tensor::set_data<bool>(std::vector<bool> new_data);
-template void Tensor::set_data<int8_t>(std::vector<int8_t> new_data);
-template void Tensor::set_data<int16_t>(std::vector<int16_t> new_data);
-template void Tensor::set_data<int32_t>(std::vector<int32_t> new_data);
-template void Tensor::set_data<int64_t>(std::vector<int64_t> new_data);
-template void Tensor::set_data<uint8_t>(std::vector<uint8_t> new_data);
-template void Tensor::set_data<uint16_t>(std::vector<uint16_t> new_data);
-template void Tensor::set_data<uint32_t>(std::vector<uint32_t> new_data);
-template void Tensor::set_data<uint64_t>(std::vector<uint64_t> new_data);
+
 
 // VALID set_data TEMPLATES
 template void Tensor::set_data<float>(std::vector<float> new_data, const std::vector<int64_t>& new_shape);
 template void Tensor::set_data<double>(std::vector<double> new_data, const std::vector<int64_t>& new_shape);
 //template void Tensor::set_data<bool>(std::vector<bool> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<int8_t>(std::vector<int8_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<int16_t>(std::vector<int16_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<int32_t>(std::vector<int32_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<int64_t>(std::vector<int64_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<uint8_t>(std::vector<uint8_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<uint16_t>(std::vector<uint16_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<uint32_t>(std::vector<uint32_t> new_data, const std::vector<int64_t>& new_shape);
-template void Tensor::set_data<uint64_t>(std::vector<uint64_t> new_data, const std::vector<int64_t>& new_shape);
