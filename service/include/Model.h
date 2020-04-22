@@ -1,9 +1,8 @@
 //
-// Created by sergio on 12/05/19.
+// Model
 //
 
-#ifndef CPPFLOW_MODEL_H
-#define CPPFLOW_MODEL_H
+#pragma once
 
 #include <cstring>
 #include <algorithm>
@@ -12,10 +11,14 @@
 #include <iostream>
 #include <fstream>
 #include <tuple>
+#include <memory>
 #include <tensorflow/c/c_api.h>
 #include "Tensor.h"
 
 class Tensor;
+
+//using GraphResourcePtr = std::unique_ptr<TF_Graph> ;
+
 
 class Model {
 public:
@@ -48,8 +51,15 @@ public:
     void run(const std::vector<Tensor*>& inputs, Tensor* output);
     void run(Tensor* input, Tensor* output);
 
+    struct GraphCreate {
+        TF_Graph * operator()() { return TF_NewGraph(); }
+    };
+    struct GraphDeleter {
+        void operator()(TF_Graph* b) { TF_DeleteGraph(b); }
+    };
+
 private:
-    TF_Graph* graph;
+    std::unique_ptr<TF_Graph, GraphDeleter> graph;
     TF_Session* session;
     TF_Status* status;
 
@@ -64,4 +74,3 @@ public:
 };
 
 
-#endif //CPPFLOW_MODEL_H

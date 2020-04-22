@@ -1,25 +1,21 @@
-//
-// Created by sergio on 12/05/19.
-//
-
 #include "../include/Model.h"
 
-Model::Model(const std::string& model_filename) {
+Model::Model(const std::string& model_filename):graph(TF_NewGraph()){
 
     this->status = TF_NewStatus();
-    this->graph = TF_NewGraph();
+    //this->graph = std::make_unique<TF_Graph>(GraphCreate(), GraphDeleter); //TF_NewGraph();
 
     // Create the session.
     TF_SessionOptions* sess_opts = TF_NewSessionOptions();
 
-    this->session = TF_NewSession(this->graph, sess_opts, this->status);
+    this->session = TF_NewSession(graph.get(), sess_opts, this->status);
     TF_DeleteSessionOptions(sess_opts);
 
     // Check the status
     this->status_check(true);
 
     // Create the graph
-    TF_Graph* g = this->graph;
+    ////TF_Graph* g = this->graph;
 
 
     // Import the graph definition
@@ -27,7 +23,7 @@ Model::Model(const std::string& model_filename) {
     this->error_check(def != nullptr, "An error occurred reading the model");
 
     TF_ImportGraphDefOptions* graph_opts = TF_NewImportGraphDefOptions();
-    TF_GraphImportGraphDef(g, def, graph_opts, this->status);
+    TF_GraphImportGraphDef(graph.get(), def, graph_opts, this->status);
     TF_DeleteImportGraphDefOptions(graph_opts);
     TF_DeleteBuffer(def);
 
@@ -37,14 +33,14 @@ Model::Model(const std::string& model_filename) {
 
 Model::~Model() {
     TF_DeleteSession(this->session, this->status);
-    TF_DeleteGraph(this->graph);
+    ///TF_DeleteGraph(this->graph);
     this->status_check(true);
     TF_DeleteStatus(this->status);
 }
 
 
 void Model::init() {
-    TF_Operation* init_op[1] = {TF_GraphOperationByName(this->graph, "init")};
+    TF_Operation* init_op[1] = {TF_GraphOperationByName(this->graph.get(), "init")};
 
     this->error_check(init_op[0]!= nullptr, "Error: No operation named \"init\" exists");
 
@@ -71,12 +67,12 @@ void Model::save(const std::string &ckpt) {
     }
 
     TF_Output output_file;
-    output_file.oper = TF_GraphOperationByName(this->graph, "save/Const");
+    output_file.oper = TF_GraphOperationByName(this->graph.get(), "save/Const");
     output_file.index = 0;
     TF_Output inputs[1] = {output_file};
 
     TF_Tensor* input_values[1] = {t};
-    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(this->graph, "save/control_dependency")};
+    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(this->graph.get(), "save/control_dependency")};
     if (!restore_op[0]) {
         TF_DeleteTensor(t);
         this->error_check(false, "Error: No operation named \"save/control_dependencyl\" exists");
@@ -106,12 +102,12 @@ void Model::restore(const std::string& ckpt) {
     }
 
     TF_Output output_file;
-    output_file.oper = TF_GraphOperationByName(this->graph, "save/Const");
+    output_file.oper = TF_GraphOperationByName(this->graph.get(), "save/Const");
     output_file.index = 0;
     TF_Output inputs[1] = {output_file};
 
     TF_Tensor* input_values[1] = {t};
-    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(this->graph, "save/restore_all")};
+    const TF_Operation* restore_op[1] = {TF_GraphOperationByName(this->graph.get(), "save/restore_all")};
     if (!restore_op[0]) {
         TF_DeleteTensor(t);
         this->error_check(false, "Error: No operation named \"save/restore_all\" exists");
@@ -168,7 +164,7 @@ std::vector<std::string> Model::get_operations() const {
     TF_Operation* oper;
 
     // Iterate through the operations of a graph
-    while ((oper = TF_GraphNextOperation(this->graph, &pos)) != nullptr) {
+    while ((oper = TF_GraphNextOperation(this->graph.get(), &pos)) != nullptr) {
         result.emplace_back(TF_OperationName(oper));
     }
 

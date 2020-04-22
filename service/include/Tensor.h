@@ -1,9 +1,4 @@
-//
-// Created by sergio on 13/05/19.
-//
-
-#ifndef CPPFLOW_TENSOR_H
-#define CPPFLOW_TENSOR_H
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -63,4 +58,3 @@ public:
     friend class Model;
 };
 
-#endif //CPPFLOW_TENSOR_H

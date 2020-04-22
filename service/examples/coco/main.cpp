@@ -1,7 +1,3 @@
-//
-// Created by sergio on 16/05/19.
-//
-
 #include "../../include/Model.h"
 #include "../../include/Tensor.h"
 #include <opencv2/opencv.hpp>

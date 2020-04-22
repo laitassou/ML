@@ -1,6 +1,3 @@
-//
-// Created by sergio on 12/05/19.
-//
 
 #include "../../include/Model.h"
 #include "../../include/Tensor.h"

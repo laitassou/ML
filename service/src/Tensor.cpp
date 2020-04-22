@@ -1,7 +1,3 @@
-//
-// Created by sergio on 13/05/19.
-//
-
 #include "../include/Tensor.h"
 
 #include <utility>
@@ -9,7 +5,7 @@
 Tensor::Tensor(const Model& model, const std::string& operation) {
 
     // Get operation by the name
-    this->op.oper = TF_GraphOperationByName(model.graph, operation.c_str());
+    this->op.oper = TF_GraphOperationByName(model.graph.get(), operation.c_str());
     this->op.index = 0;
 
     // Operation did not exists
@@ -18,7 +14,7 @@ Tensor::Tensor(const Model& model, const std::string& operation) {
     // DIMENSIONS
 
     // Get number of dimensions
-    int n_dims = TF_GraphGetTensorNumDims(model.graph, this->op, model.status);
+    int n_dims = TF_GraphGetTensorNumDims(model.graph.get(), this->op, model.status);
 
     // DataType
     this->type = TF_OperationOutputType(this->op);
@@ -27,7 +23,7 @@ Tensor::Tensor(const Model& model, const std::string& operation) {
     if (n_dims > 0) {
         // Get dimensions
         auto *dims = new int64_t[n_dims];
-        TF_GraphGetTensorShape(model.graph, this->op, dims, n_dims, model.status);
+        TF_GraphGetTensorShape(model.graph.get(), this->op, dims, n_dims, model.status);
 
         // Check error on Model Status
         model.status_check(true);
