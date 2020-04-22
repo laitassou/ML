@@ -1,0 +1,7 @@
+source ./venv/bin/activate 
+deactivate
+
+
+  752  venv/bin/python regression/testfroze.py 
+  753  venv/bin/python regression/fuel.py 
+
