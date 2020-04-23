@@ -18,6 +18,8 @@ int main() {
     ModelInfos<float> mInfos("../ModelInfo.txt");
     mInfos.show();
 
+    mInfos.parse();
+
     // Create Tensors
     Tensor input(m, "x");
     Tensor prediction(m, "Identity");
