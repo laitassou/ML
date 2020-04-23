@@ -1,5 +1,7 @@
 #include "../../include/Model.h"
 #include "../../include/Tensor.h"
+#include "../../include/ModelInfos.h"
+
 #include <algorithm>
 #include <iterator>
 
@@ -8,9 +10,13 @@ using namespace std;
 
 int main() {
 
+
     // Create model
     Model m("../frozen_graph.pb");
     //m.restore("../checkpoint/train.ckpt");
+
+    ModelInfos<float> mInfos("../ModelInfo.txt");
+    mInfos.show();
 
     // Create Tensors
     Tensor input(m, "x");

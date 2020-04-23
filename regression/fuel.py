@@ -1,3 +1,10 @@
+#
+# LAA model
+#
+
+
+import json
+
 import pathlib
 
 import matplotlib.pyplot as plt
@@ -55,8 +62,13 @@ train_stats.pop("MPG")
 train_stats = train_stats.transpose()
 train_stats
 print("train_stats:")
+print (type(train_stats))
+print(train_stats.to_numpy())
 
-print(train_stats)
+
+train_stats.to_json('ModelInfo.txt')
+
+
 
 train_labels = train_dataset.pop('MPG')
 test_labels = test_dataset.pop('MPG')
@@ -64,10 +76,12 @@ test_labels = test_dataset.pop('MPG')
 
 def norm(x):
   return (x - train_stats['mean']) / train_stats['std']
+
 normed_train_data = norm(train_dataset)
 normed_test_data = norm(test_dataset)
 
 print("length key:"+str(len(train_dataset.keys())))
+
 def build_model():
   model = keras.Sequential([
     layers.Dense(64, activation='relu', input_shape=[len(train_dataset.keys())]),
