@@ -1,6 +1,6 @@
-#include "../../include/Model.h"
-#include "../../include/Tensor.h"
-#include "../../include/ModelInfos.h"
+#include "../../include/Model.hpp"
+#include "../../include/Tensor.hpp"
+#include "../../include/ModelInfos.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -16,10 +16,15 @@ int main() {
     //m.restore("../checkpoint/train.ckpt");
 
     ModelInfos<float> mInfos("../ModelInfo.txt");
-    mInfos.show();
 
     mInfos.parse();
 
+    mInfos.show();
+
+
+    mInfos.compute_columns();
+
+    std::cout << "depth:" <<mInfos.get_depth() <<std::endl;
     // Create Tensors
     Tensor input(m, "x");
     Tensor prediction(m, "Identity");

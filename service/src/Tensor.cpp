@@ -1,4 +1,4 @@
-#include "../include/Tensor.h"
+#include "../include/Tensor.hpp"
 
 #include <utility>
 

@@ -15,7 +15,7 @@
 #include <tuple>
 #include <memory>
 #include <tensorflow/c/c_api.h>
-#include "Tensor.h"
+#include "Tensor.hpp"
 
 class Tensor;
 

@@ -13,7 +13,7 @@
 #include <numeric>
 #include <cstring>
 #include <tensorflow/c/c_api.h>
-#include "Model.h"
+#include "Model.hpp"
 
 class Model;
 

@@ -1,4 +1,4 @@
-#include "../include/Model.h"
+#include "../include/Model.hpp"
 
 Model::Model(const std::string& model_filename):_graph(TF_NewGraph()),_status( TF_NewStatus()){
 
