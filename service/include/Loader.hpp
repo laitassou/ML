@@ -1,46 +1,49 @@
-#praga once
+#pragma once
 
+#include <iostream>
+#include "ModelManager.hpp"
+
+using namespace std;
 
 namespace ML {
-enum class Satus
-{
-    LOAD_STARTED,
-    LOAD_ONGOING,
-    LOAD_ENDED
-}
 
+ 
+// Loader abstract interface
 class Loader{
  public:
-     
-     void Load() 
-     {
-         doLoad();
-     };
 
-
-     void Unload()
-     { 
-         doUnload();
-     }
-
-
-     void EstimateRessource()
-     {
-       doEstimate();
+    Loader(){ 
+        cout << "Loader"<< endl;
     }
 
+    void Load(){
+        doLoad();
+    }
 
- private:    
+    void Unload() { 
+        doUnload();
+    }
 
-   virtual void doLoad() =0;
-   virtual void doUnload() =0;
-   virtual void doEstimate() =0;
+    void EstimateRessource(){
+        doEstimate();
+    }
 
-   std::string _resource_name;
+    Status LoadWithMetadata(const ModelId& model){
+        doLoadWithMetadata(model);
+        return  Status::OK;
+    } 
+
+    virtual ~Loader(){};
+
+    virtual void * servable() = 0;
+    
+ private:
+    virtual Status doLoadWithMetadata(const ModelId& model) {Load();  return Status::ERROR;};
+    virtual void doLoad() =0;
+    virtual void doUnload() =0;
+    virtual void doEstimate() {};
 
 
 };
-
-using LoaderSource = Source<std::unique_ptr<Loader>>;
 
 }

@@ -2,18 +2,35 @@
 #include "../../include/Tensor.hpp"
 #include "../../include/ModelInfos.hpp"
 
+#include "../../include/ModelManager.hpp"
+#include "../../include/Loader.hpp"
+#include "../../include/LoaderHarness.hpp"
+
+#include "../../include/TFLoader.hpp"
+#include "../../include/BasicModelManager.hpp"
+
+
 #include <algorithm>
 #include <iterator>
 
 
 using namespace std;
+using namespace ML;
+
+
+template <typename Enumeration>
+auto as_integer(Enumeration const value)
+    -> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
 
 int main() {
 
 
     // Create model
-    Model m("../frozen_graph.pb");
-    //m.restore("../checkpoint/train.ckpt");
+    //Model m("../frozen_graph.pb");
+    ////m.restore("../checkpoint/train.ckpt");
 
     ModelInfos<float> mInfos("../ModelInfo.txt");
 
@@ -21,6 +38,54 @@ int main() {
 
     mInfos.show();
 
+
+
+
+    //std::unique_ptr<Loader> p_loader;
+
+    //p_loader =  make_unique<BasicLoader>("../frozen_graph.pb");
+
+    std::array<ModelId,1> mlist = { ModelId{"mpg",{1,0}}};
+
+    //auto p_loader_harness = make_unique<LoaderHarness>(model_id , std::move(p_loader));
+
+    //p_loader_harness->Load();
+
+    //cout << "state:" << as_integer(p_loader_harness->state())<<endl;
+
+    //p_loader_harness->Unload();
+    //p_loader->Unload();
+    //cout << "state:" << as_integer(p_loader_harness->state())<<endl;
+
+    std::unique_ptr<BasicModelManager> manager_;
+    BasicModelManager::Create(&manager_);
+
+    for (auto &el :  mlist){
+        manager_->LoadModel(el,"../","frozen_graph.pb");
+    }
+
+    auto v = manager_->ListAvailableModelIds();
+
+    for( auto &elem: v)
+    {
+        cout << "name : " << elem.name << "version:" << elem.version.major <<endl;
+    }
+
+    //manager_->UnloadModel(mlist[0]);
+
+    //std::unique_ptr<UntypedModelHandle> untyped_handle ;
+    
+    ModelHandle<int64_t>  handle ; 
+    manager_->GetModelHandle(mlist[0],&handle);
+
+
+    manager_->UnloadModel(mlist[0]);
+
+    
+
+
+
+#if 0
 
     mInfos.compute_columns();
 
@@ -76,6 +141,8 @@ Origin        314.0     1.573248    0.800988     1.0     1.00     1.0     2.00  
     }
     std::cout << std::endl;
 
+
+#endif
 
     
 }
