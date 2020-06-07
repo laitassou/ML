@@ -1,4 +1,11 @@
-#pragma once
+/*
+ *
+ *
+ *
+ *
+ */
+#ifndef _ML_LOADER_
+#define _ML_LOADER_
 
 #include <iostream>
 #include "ModelManager.hpp"
@@ -8,12 +15,13 @@ using namespace std;
 namespace ML {
 
  
-// Loader abstract interface
+// Loader interface to load/unload model
+// NVI interface to offer more flexibility to check preconditions/ postconditions
 class Loader{
  public:
 
     Loader(){ 
-        cout << "Loader"<< endl;
+        cout << "Loader ctor"<< endl;
     }
 
     void Load(){
@@ -28,17 +36,10 @@ class Loader{
         doEstimate();
     }
 
-    Status LoadWithMetadata(const ModelId& model){
-        doLoadWithMetadata(model);
-        return  Status::OK;
-    } 
-
     virtual ~Loader(){};
-
     virtual void * servable() = 0;
     
  private:
-    virtual Status doLoadWithMetadata(const ModelId& model) {Load();  return Status::ERROR;};
     virtual void doLoad() =0;
     virtual void doUnload() =0;
     virtual void doEstimate() {};
@@ -47,3 +48,5 @@ class Loader{
 };
 
 }
+
+#endif //_ML_LOADER_

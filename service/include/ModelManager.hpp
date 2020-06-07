@@ -1,4 +1,13 @@
-#pragma once
+/*
+ *
+ *
+ *
+ *
+ *
+ */
+
+#ifndef _ML_MODEL_MANAGER_
+#define _ML_MODEL_MANAGER_
 
 #include <iostream>
 #include <string>
@@ -33,16 +42,19 @@ enum class Version_SELECT
     FIRST,
     LAST,
 };
+
 struct Version{
   size_t major;
   size_t minor;
   Version(size_t mj, size_t mn): major(mj),minor(mn){}
 };
 
+
 struct  ModelId {
   std::string name;
   Version version;
 };
+
 
 class UntypedModelHandle {
  public:
@@ -91,47 +103,24 @@ template <typename T> class ModelHandle {
 
 
 
- template<class InputType, class OutputType>  struct ModelContext{
-    InputType input_type;
+template<class InputType, class OutputType>  class ModelContext 
+{
+    public:
+    ModelContext (size_t id,uint8_t inf_mask,size_t inp_size, size_t out_size, InputType * in_buf, OutputType * out_buf);
+
+    private:        
+    size_t id;
+    uint8_t inference_mask;
+
+    //InputType input_type;
     size_t input_size;
-    OutputType output_type;
+    //OutputType output_type;
     size_t output_size;
     //void * input_buffer;
     InputType * input_buffer;
     //void * output_buffer;
     OutputType * output_buffer;
-
 };
-
-
-template<class InputType, class OutputType>  class RefModel :  ModelId 
-{
-    public:
-    RefModel (size_t id, ModelContext <InputType, OutputType > * p_ctx): id(id), p_Model_Context(p_ctx) {};
-
-    private:        
-    size_t id;
-    uint8_t inference_mask;
-    ModelContext <InputType, OutputType >  * p_Model_Context;
-};
-
-
-
-
-
-struct ModelRequest {
-
-  std::string name;
-
-  unsigned version;
-
-
-  ModelRequest() = default;
-  ModelRequest(const std::string& name_in, size_t version_in)
-      : name(name_in),
-        version(version_in){}
-};
-
 
 
 
@@ -149,42 +138,23 @@ constexpr bool operator!=(const ModelHandle<T>& l,
 
 
 
-
-inline bool operator==(const ModelRequest& l,
-                          const ModelRequest& r) {
-  return l.name == r.name && l.version == r.version;
-}
-
-
-inline bool operator<(const ModelRequest& l,
-                          const ModelRequest& r) {
-  return l.name.compare( r.name);
+inline bool operator==(const ModelId& l, const ModelId& r)
+{
+  return (l.name.compare( r.name)==0) && 
+    l.version.major == r.version.major &&  
+    l.version.minor == r.version.minor;
 }
 
 
 
-
-
-inline bool operator==(const ModelId& l,
-                          const ModelId& r) {
-  return l.name.compare( r.name) && l.version.major == r.version.major &&  l.version.minor == r.version.minor;
-}
-
-
-inline bool operator<(const ModelId& l,
-                          const ModelId& r) {
-  return l.name.compare( r.name);
-}
-
-
-
-
-
-
-
+/*
+ *
+ *
+ *
+ *
+ */
 class ModelManager {
  public:
-
   virtual ~ModelManager() = default;
 
   virtual std::vector<ModelId> ListAvailableModelIds() const = 0;
@@ -236,3 +206,4 @@ std::map<ModelId, ModelHandle<T>> ModelManager::GetAvailableModelHandles()
 
 }
 
+#endif //_ML_MODEL_MANAGER_

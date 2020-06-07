@@ -7,15 +7,16 @@
 namespace ML {
 
 // Loader implemntation    
+class ONNXMODEL {};
 
-class TFLoader :  public Loader {
+class ONNXLoader :  public Loader {
 
 public: 
 
-    TFLoader(const std::string & resource_path, const std::string & resource_name) : _resource_path(resource_path),
+    ONNXLoader(const std::string & resource_path, const std::string & resource_name) : _resource_path(resource_path),
     _resource_name(resource_name) {}
 
-    ~TFLoader() { 
+    ~ONNXLoader() { 
         cout << "basic loader destructor " << endl;
         //doUnload();
     }
@@ -27,14 +28,14 @@ public:
     void doLoad() override 
     {
         //T  _m = new (_m) T(_resource_name);
-        cout << "doLoad basic loader"<< endl;
+        cout << "doLoad ONNX loader"<< endl;
         //return _m;
-        _servable.reset( new Model(_resource_path+_resource_name));
+        //_servable.reset( new Model(_resource_path+_resource_name));
     }
         
     void doUnload() override
     {
-        cout << "doUnLoad basic loader"<< endl;
+        cout << "doUnLoad ONNX loader"<< endl;
         _servable.reset();
 
         //delete m;
@@ -47,8 +48,8 @@ public:
     std::string _resource_path;
     std::string _resource_name;
 
-    std::unique_ptr<Model> _servable;
-    //ModelHandle<Model> _handle;
+    std::unique_ptr<ONNXMODEL> _servable;
+    //ModelHandle<ONNXCLASS> _handle;
 
 
 };

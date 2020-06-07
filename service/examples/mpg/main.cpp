@@ -6,8 +6,10 @@
 #include "../../include/Loader.hpp"
 #include "../../include/LoaderHarness.hpp"
 
-#include "../../include/TFLoader.hpp"
+
 #include "../../include/BasicModelManager.hpp"
+
+
 
 
 #include <algorithm>
@@ -45,8 +47,14 @@ int main() {
 
     //p_loader =  make_unique<BasicLoader>("../frozen_graph.pb");
 
-    std::array<ModelId,1> mlist = { ModelId{"mpg",{1,0}}};
+    std::array<const ModelId,2> mlist = { ModelId{"mpg",{1,0}},ModelId{"mpg",{1,1}}};
 
+    if( mlist[0] == mlist[1])
+    {
+        cout << "equal" << endl;
+    }
+
+    
     //auto p_loader_harness = make_unique<LoaderHarness>(model_id , std::move(p_loader));
 
     //p_loader_harness->Load();
@@ -57,42 +65,45 @@ int main() {
     //p_loader->Unload();
     //cout << "state:" << as_integer(p_loader_harness->state())<<endl;
 
+    ModelHandle<Model>  handle ; 
+
+
     std::unique_ptr<BasicModelManager> manager_;
     BasicModelManager::Create(&manager_);
 
     for (auto &el :  mlist){
-        manager_->LoadModel(el,"../","frozen_graph.pb");
+        cout << "load model :" << el.name << ": "<<el.version.major << ":" <<el.version.minor<<endl;
+        manager_->LoadModel(el,"../","frozen_graph.pb", ModelType::TFL);
     }
 
     auto v = manager_->ListAvailableModelIds();
 
     for( auto &elem: v)
     {
-        cout << "name : " << elem.name << "version:" << elem.version.major <<endl;
+        cout << "name : " << elem.name << "version:" << elem.version.major <<"."<< elem.version.minor<<endl;
     }
 
     //manager_->UnloadModel(mlist[0]);
 
     //std::unique_ptr<UntypedModelHandle> untyped_handle ;
     
-    ModelHandle<int64_t>  handle ; 
     manager_->GetModelHandle(mlist[0],&handle);
 
-
-    manager_->UnloadModel(mlist[0]);
+    Model * md = handle.get();
+    //manager_->UnloadModel(mlist[0]);
 
     
 
 
 
-#if 0
+
 
     mInfos.compute_columns();
 
     std::cout << "depth:" <<mInfos.get_depth() <<std::endl;
     // Create Tensors
-    Tensor input(m, "x");
-    Tensor prediction(m, "Identity");
+    Tensor input(*md, "x");
+    Tensor prediction(*md, "Identity");
 
 
     std::array<float,7> mean {5.477,195.32,104.86,2990.25,15.56,75.89,1.573};
@@ -131,7 +142,7 @@ Origin        314.0     1.573248    0.800988     1.0     1.00     1.0     2.00  
     input.set_data(norm_data);
 
     // Run and show predictions
-    m.run(input, prediction);
+    md->run(input, prediction);
 
     // Get tensor with predictions
     auto result = prediction.Tensor::get_data<float>();
@@ -142,7 +153,7 @@ Origin        314.0     1.573248    0.800988     1.0     1.00     1.0     2.00  
     std::cout << std::endl;
 
 
-#endif
+
 
     
 }

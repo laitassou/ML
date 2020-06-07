@@ -38,7 +38,7 @@ class LoaderHarness  {
  private:
 
   const ModelId _id;
-  const std::unique_ptr<Loader> _loader;
+  const std::shared_ptr<Loader> _loader;
   State _state = State::New;
   mutable std::mutex _mu;
 
