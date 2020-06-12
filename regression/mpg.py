@@ -151,7 +151,7 @@ plt.show()
 
 
 # Save model to SavedModel format
-tf.saved_model.save(model, "./models")
+tf.saved_model.save(model, "./models_mpg")
 
 
 # Convert Keras model to ConcreteFunction
