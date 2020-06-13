@@ -5,7 +5,7 @@
 #include <iomanip>
 
 int main() {
-    Model model("../model.pb");
+    Model model("../simle_model.pb");
     model.init();
 
     Tensor input_a{model, "input_a"};
