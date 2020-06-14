@@ -36,7 +36,7 @@ print(model.layers[0].get_weights())
 
 
 # Save model to SavedModel format
-tf.saved_model.save(model, "./affine/")
+tf.saved_model.save(model, "./model_affine/affine/")
 
 yy= [model((np.array([[xi]],np.float32))).numpy()[0,0] for xi in x]
 
@@ -48,7 +48,7 @@ plt.plot(x, yy, c='r', label='model')
 
 plt.show()
 
-#result example    y=  -0.38 x  - 5.9
+#y = -0.3388672 x   -6.046595
 
 x_in = [0,1]
 y_out = model.predict(x_in)
