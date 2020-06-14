@@ -2,6 +2,10 @@ source ./venv/bin/activate
 deactivate
 
 
-  752  venv/bin/python regression/testfroze.py 
-  753  venv/bin/python regression/fuel.py 
+  venv/bin/python regression/testfroze.py 
+  venv/bin/python regression/fuel.py
 
+ 
+ convert to onnx:
+
+python -m tf2onnx.convert --saved-model model_affine/affine/ --output affine.onnx
