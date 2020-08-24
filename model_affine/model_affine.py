@@ -12,8 +12,8 @@ x = np.array([1, 5, 8, 9 ,10, 15,13, 3,-2],np.float32)
 y = np.array([-2,-5, -7, -12 ,-15, -5, -12,-10,-5],np.float32)
 
 
-BATCH_SIZE  = 4
-num_epochs = 1000
+BATCH_SIZE  = 1
+num_epochs = 200
 
 dataset = tf.data.Dataset.from_tensor_slices(( x , y ))
 
@@ -29,7 +29,7 @@ model.layers[0].set_weights([np.array([[7.3]],np.float32),np.array([5.5],np.floa
 
 model.compile(optimizer='sgd', loss='mse')
 
-model.fit(dataset, epochs=num_epochs, steps_per_epoch=tf.data.experimental.cardinality(dataset).numpy() // BATCH_SIZE -1, verbose=0)
+model.fit(dataset, epochs=num_epochs, steps_per_epoch=tf.data.experimental.cardinality(dataset).numpy() ,  batch_size = 1, verbose=0)
 
 print(model.layers[0].get_weights())
 
